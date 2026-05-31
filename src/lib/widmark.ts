@@ -197,3 +197,84 @@ export function sampleCurve(
 	}
 	return points;
 }
+
+export interface TimelinePoint {
+	tMin: number;
+	minutesFromStart: number;
+	bac: number;
+}
+
+export interface ProjectionTimeline {
+	fromMin: number;
+	nowMin: number;
+	firstDrinkMin: number;
+	driveMin: number;
+	limit: number;
+	toMin: number;
+	points: TimelinePoint[];
+	peakBac: number;
+}
+
+const TIMELINE_MARGIN_MIN = 10;
+const SOBER_SPAN_MIN = 60;
+const TIMELINE_STEPS = 48;
+
+export function firstDrinkMinute(drinks: Drink[], nowMin: number): number {
+	if (drinks.length === 0) return nowMin;
+	return Math.min(...drinks.map((d) => resolveDrinkMinute(d.heure, nowMin)));
+}
+
+export function buildProjectionTimeline(
+	drinks: Drink[],
+	profile: Profile,
+	stomach: StomachState,
+	nowMin: number
+): ProjectionTimeline {
+	const limit = legalLimit(profile.jeunePermis);
+	const fdMin = firstDrinkMinute(drinks, nowMin);
+	const fromMin = drinks.length === 0 ? nowMin : fdMin;
+	const driveMin = driveTimeMinute(drinks, profile, stomach, nowMin);
+
+	let toMin: number;
+	if (drinks.length === 0) {
+		toMin = nowMin + SOBER_SPAN_MIN;
+	} else if (driveMin > nowMin) {
+		const items = toAbsorbed(drinks, nowMin);
+		const r = WIDMARK_R[profile.sexe];
+		const rise = STOMACH_RISE_MIN[stomach];
+		const bacAtDrive = bacAtMinute(items, profile.poids, r, rise, driveMin);
+		toMin = bacAtDrive > limit ? driveMin + TIMELINE_MARGIN_MIN : driveMin;
+	} else {
+		toMin = nowMin + SOBER_SPAN_MIN;
+	}
+
+	const items = toAbsorbed(drinks, nowMin);
+	const r = WIDMARK_R[profile.sexe];
+	const rise = STOMACH_RISE_MIN[stomach];
+	const span = Math.max(1, toMin - fromMin);
+	const traj = items.length
+		? trajectory(items, profile.poids, r, rise, Math.round(toMin))
+		: null;
+	const points: TimelinePoint[] = [];
+	for (let i = 0; i <= TIMELINE_STEPS; i++) {
+		const t = fromMin + (span * i) / TIMELINE_STEPS;
+		const idx = traj ? Math.round(t) - traj.firstStart : -1;
+		points.push({
+			tMin: t,
+			minutesFromStart: t - fromMin,
+			bac: traj && idx >= 0 && idx < traj.bac.length ? traj.bac[idx] : 0
+		});
+	}
+	const peakBac = Math.max(0, ...points.map((p) => p.bac));
+
+	return {
+		fromMin,
+		nowMin,
+		firstDrinkMin: fdMin,
+		driveMin,
+		limit,
+		toMin,
+		points,
+		peakBac
+	};
+}

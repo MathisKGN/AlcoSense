@@ -6,7 +6,9 @@ import {
 	resolveDrinkMinute,
 	driveTimeMinute,
 	bacNow,
-	sampleCurve
+	sampleCurve,
+	buildProjectionTimeline,
+	firstDrinkMinute
 } from './widmark';
 import type { Drink, Profile } from './types';
 
@@ -182,5 +184,69 @@ describe('sampleCurve', () => {
 		expect(pts).toHaveLength(41);
 		expect(pts[0].minutesFromNow).toBe(0);
 		expect(pts[40].minutesFromNow).toBeCloseTo(120, 5);
+	});
+});
+
+describe('firstDrinkMinute', () => {
+	it('returns earliest resolved drink minute', () => {
+		const nowMin = 20 * 60;
+		const drinks = [
+			{ id: '1', type: 'biere' as const, volume: 250, degre: 5, heure: '19:00' },
+			{ id: '2', type: 'biere' as const, volume: 250, degre: 5, heure: '18:30' }
+		];
+		expect(firstDrinkMinute(drinks, nowMin)).toBe(18 * 60 + 30);
+	});
+});
+
+describe('buildProjectionTimeline', () => {
+	it('starts window at first drink, not now', () => {
+		const nowMin = 20 * 60;
+		const drinks = beers(2, '18:00');
+		const tl = buildProjectionTimeline(drinks, HOMME, 'vide', nowMin);
+		expect(tl.fromMin).toBe(18 * 60);
+		expect(tl.fromMin).toBeLessThan(nowMin);
+		expect(tl.nowMin).toBe(nowMin);
+	});
+
+	it('ends at or below limit at toMin when drive is in the future', () => {
+		const nowMin = 18 * 60;
+		const drinks = Array.from({ length: 6 }, (_, i) => ({
+			id: String(i),
+			type: 'shot' as const,
+			volume: 30,
+			degre: 40,
+			heure: '17:00'
+		}));
+		const tl = buildProjectionTimeline(drinks, HOMME, 'vide', nowMin);
+		if (tl.driveMin > nowMin) {
+			const last = tl.points[tl.points.length - 1];
+			expect(last.bac).toBeLessThanOrEqual(tl.limit + 1e-6);
+		}
+	});
+
+	it('adds +10 min margin only when still over limit at driveMin', () => {
+		const nowMin = 18 * 60;
+		const drinks = Array.from({ length: 6 }, (_, i) => ({
+			id: String(i),
+			type: 'shot' as const,
+			volume: 30,
+			degre: 40,
+			heure: '17:00'
+		}));
+		const tl = buildProjectionTimeline(drinks, HOMME, 'vide', nowMin);
+		if (tl.driveMin > nowMin) {
+			const atDrive = tl.points.find((p) => p.tMin === tl.driveMin);
+			if (atDrive && atDrive.bac > tl.limit) {
+				expect(tl.toMin).toBe(tl.driveMin + 10);
+			}
+		}
+	});
+
+	it('returns flat zero when no drinks', () => {
+		const nowMin = 600;
+		const tl = buildProjectionTimeline([], HOMME, 'vide', nowMin);
+		expect(tl.fromMin).toBe(nowMin);
+		expect(tl.peakBac).toBe(0);
+		expect(tl.points.every((p) => p.bac === 0)).toBe(true);
 	});
 });
