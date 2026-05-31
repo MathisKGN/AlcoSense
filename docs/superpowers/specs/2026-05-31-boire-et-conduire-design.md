@@ -49,8 +49,7 @@ repas complet → ajuste la durée de la phase de montée (voir calcul).
 ## Calcul de l'alcoolémie (Widmark)
 
 On utilise **uniquement la formule métrique** (A en grammes, poids en kg, taux en
-g/L). La variante impériale `BAC = A × 5,14 / W × r − 0,015 H` (onces / livres / %)
-n'est **pas** utilisée — mélanger les deux fausserait le résultat d'un facteur ~10.
+g/L). 
 
 **Alcool pur d'un verre (g)** :
 ```
@@ -74,9 +73,6 @@ consommation du verre et `m` = durée de montée :
 - si `t < 0` : contribution = 0 (verre dans le futur)
 - si `0 ≤ t < m` : fraction absorbée = `t / m`
 - si `t ≥ m` : fraction absorbée = 1
-
-Manger ne fait pas éliminer l'alcool plus vite : ça étale la courbe et abaisse le
-pic, mais l'heure finale de retour sous le seuil bouge peu.
 
 **Contribution d'un verre au taux brut (g/L)**, avant élimination :
 ```
@@ -110,15 +106,11 @@ borné à ≥ 0. On ne descend jamais sous 0.
 
 ## Disclaimer
 
-Affiché en permanence : estimation **indicative**, ne remplace **jamais** un
-éthylotest. Le métabolisme varie selon les personnes, l'état de santé, la fatigue,
-les médicaments, etc. En cas de doute : ne pas conduire.
+Aucun disclaimer
 
 ## Design visuel
 
-Soigné et fun : palette cohérente, feedback visuel clair (vert/orange/rouge selon
-le taux), interface agréable et lisible. Responsive mobile (cas d'usage = soirée,
-téléphone en main).
+Maquette ici : /Maquette_Design
 
 ## Découpage en composants (isolation)
 
