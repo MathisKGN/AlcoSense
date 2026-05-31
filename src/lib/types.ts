@@ -29,7 +29,7 @@ export const DRINK_PRESETS: Record<DrinkType, DrinkPreset> = {
 	vin: { label: 'Vin', icon: 'wine_bar', volume: 125, degre: 12 },
 	shot: { label: 'Shot', icon: 'liquor', volume: 30, degre: 40 },
 	cocktail: { label: 'Cocktail', icon: 'local_bar', volume: 100, degre: 15 },
-	spiritueux: { label: 'Spiritueux', icon: 'glass_full', volume: 40, degre: 40 }
+	spiritueux: { label: 'Spiritueux', icon: 'local_drink', volume: 40, degre: 40 }
 };
 
 /** Widmark distribution coefficient r. */

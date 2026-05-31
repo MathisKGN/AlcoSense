@@ -72,8 +72,7 @@
 		<span class="text-[11px] font-bold tracking-[0.2em] text-primary uppercase">Estimation directe</span>
 	</div>
 	<h1
-		class="text-[96px] leading-none font-thin transition-colors duration-700 sm:text-[120px] {ui.number}"
-		style="letter-spacing: -0.05em;"
+		class="text-[96px] leading-none font-thin tabular-nums transition-colors duration-700 sm:text-[120px] {ui.number}"
 	>
 		{display}
 	</h1>

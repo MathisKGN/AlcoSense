@@ -3,6 +3,7 @@
 	import type { Profile, StomachState } from '$lib/types';
 
 	let {
+		bac,
 		drinks,
 		profile,
 		stomach,
@@ -10,6 +11,7 @@
 		nowMin,
 		driveMin
 	}: {
+		bac: number;
 		drinks: import('$lib/types').Drink[];
 		profile: Profile;
 		stomach: StomachState;
@@ -23,7 +25,14 @@
 	const points = $derived<CurvePoint[]>(
 		sampleCurve(drinks, profile, stomach, nowMin, toMin, 40)
 	);
-	const maxBac = $derived(Math.max(limit, ...points.map((p) => p.bac), 0.1));
+	const peakBac = $derived(Math.max(0, ...points.map((p) => p.bac)));
+	// Align scale with the hero readout: no exaggerated curve when BAC rounds to 0,00.
+	const maxBac = $derived.by(() => {
+		if (bac < 0.005 && peakBac < limit * 0.1) {
+			return limit;
+		}
+		return Math.max(limit, peakBac > 0 ? peakBac * 1.08 : 0);
+	});
 
 	// Map a point to SVG viewBox 0..100 (x left→right, y 90 bottom = 0).
 	function x(p: CurvePoint): number {

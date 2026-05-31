@@ -22,7 +22,7 @@
 </script>
 
 <BacPanel {bac} {limit} {driveMin} {nowMin} />
-<ProjectionChart {drinks} {profile} stomach={session.stomach} {limit} {nowMin} {driveMin} />
+<ProjectionChart {bac} {drinks} {profile} stomach={session.stomach} {limit} {nowMin} {driveMin} />
 
 <section class="space-y-4">
 	<QuickAdd />
