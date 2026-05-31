@@ -157,6 +157,17 @@ describe('driveTimeMinute', () => {
 		}));
 		expect(driveTimeMinute(drinks, HOMME, 'vide', 600)).toBeGreaterThan(600);
 	});
+
+	it('returns null when still at or over the limit after the 24h horizon', () => {
+		const drinks: Drink[] = Array.from({ length: 30 }, (_, i) => ({
+			id: String(i),
+			type: 'shot' as const,
+			volume: 30,
+			degre: 40,
+			heure: '22:00'
+		}));
+		expect(driveTimeMinute(drinks, HOMME, 'vide', 22 * 60)).toBeNull();
+	});
 });
 
 describe('bacNow', () => {
@@ -218,13 +229,13 @@ describe('buildProjectionTimeline', () => {
 			heure: '17:00'
 		}));
 		const tl = buildProjectionTimeline(drinks, HOMME, 'vide', nowMin);
-		if (tl.driveMin > nowMin) {
+		if (tl.driveMin !== null && tl.driveMin > nowMin) {
 			const last = tl.points[tl.points.length - 1];
-			expect(last.bac).toBeLessThanOrEqual(tl.limit + 1e-6);
+			expect(last.bac).toBeLessThan(tl.limit + 1e-6);
 		}
 	});
 
-	it('adds +10 min margin only when still over limit at driveMin', () => {
+	it('adds +10 min margin only when still at or over limit at driveMin', () => {
 		const nowMin = 18 * 60;
 		const drinks = Array.from({ length: 6 }, (_, i) => ({
 			id: String(i),
@@ -234,12 +245,32 @@ describe('buildProjectionTimeline', () => {
 			heure: '17:00'
 		}));
 		const tl = buildProjectionTimeline(drinks, HOMME, 'vide', nowMin);
-		if (tl.driveMin > nowMin) {
-			const atDrive = tl.points.find((p) => p.tMin === tl.driveMin);
-			if (atDrive && atDrive.bac > tl.limit) {
-				expect(tl.toMin).toBe(tl.driveMin + 10);
+		if (tl.driveMin !== null && tl.driveMin > nowMin) {
+			const nearDrive = tl.points.filter(
+				(p) => Math.abs(p.tMin - tl.driveMin!) <= (tl.toMin - tl.fromMin) / 48
+			);
+			const atDrive = nearDrive.reduce(
+				(best, p) => (Math.abs(p.tMin - tl.driveMin!) < Math.abs(best.tMin - tl.driveMin!) ? p : best),
+				nearDrive[0]
+			);
+			if (atDrive && atDrive.bac >= tl.limit) {
+				expect(tl.toMin).toBe(tl.driveMin! + 10);
 			}
 		}
+	});
+
+	it('sets driveMin null and extends chart to 24h when over limit for whole horizon', () => {
+		const nowMin = 22 * 60;
+		const drinks = Array.from({ length: 30 }, (_, i) => ({
+			id: String(i),
+			type: 'shot' as const,
+			volume: 30,
+			degre: 40,
+			heure: '22:00'
+		}));
+		const tl = buildProjectionTimeline(drinks, HOMME, 'vide', nowMin);
+		expect(tl.driveMin).toBeNull();
+		expect(tl.toMin).toBe(nowMin + 24 * 60);
 	});
 
 	it('returns flat zero when no drinks', () => {

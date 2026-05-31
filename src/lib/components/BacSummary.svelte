@@ -6,14 +6,22 @@
 		limit,
 		driveMin,
 		nowMin
-	}: { bac: number; limit: number; driveMin: number; nowMin: number } = $props();
+	}: { bac: number; limit: number; driveMin: number | null; nowMin: number } = $props();
 
 	const display = $derived(bac.toFixed(2).replace('.', ','));
 	const limitText = $derived(limit.toFixed(1).replace('.', ','));
 
 	type Status = 'over' | 'soon' | 'near' | 'safe';
 	const status: Status = $derived(
-		bac >= limit ? 'over' : driveMin > nowMin ? 'soon' : bac >= 0.8 * limit ? 'near' : 'safe'
+		bac >= limit
+			? 'over'
+			: driveMin === null
+				? 'soon'
+				: driveMin > nowMin
+					? 'soon'
+					: bac >= 0.8 * limit
+						? 'near'
+						: 'safe'
 	);
 
 	const ui = $derived.by(() => {
@@ -45,9 +53,9 @@
 		}
 	});
 
-	const canDriveNow = $derived(driveMin <= nowMin);
-	const remaining = $derived(Math.max(0, driveMin - nowMin));
-	const driveClock = $derived(formatMinuteOfDay(driveMin));
+	const canDriveNow = $derived(driveMin !== null && driveMin <= nowMin && bac < limit);
+	const remaining = $derived(driveMin === null ? 0 : Math.max(0, driveMin - nowMin));
+	const driveClock = $derived(driveMin === null ? '' : formatMinuteOfDay(driveMin));
 	const remainingLabel = $derived(
 		`${Math.floor(remaining / 60)} h ${String(remaining % 60).padStart(2, '0')} min`
 	);
@@ -71,6 +79,8 @@
 		<p class="mt-1 text-sm font-bold text-on-surface">
 			{#if canDriveNow}
 				Tu peux conduire
+			{:else if driveMin === null}
+				Pas d'heure fiable sous 24 h — ne conduis pas sur cette estimation
 			{:else}
 				Conduite possible à {driveClock}
 				<span class="block text-[11px] font-semibold text-outline">dans {remainingLabel}</span>

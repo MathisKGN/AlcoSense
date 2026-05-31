@@ -137,29 +137,33 @@ export function bacNow(
 }
 
 /**
- * The absolute minute (>= nowMin) AFTER WHICH the BAC stays under the legal
- * limit: the last minute in the next 24h where BAC > limit, plus 1. Returns
- * `nowMin` if BAC is already and durably below the limit. This is correct during
- * the rise phase — returning the *first* minute under the limit would wrongly
- * say "safe" just before the peak exceeds the limit.
+ * The absolute minute (>= nowMin) AFTER WHICH the BAC stays strictly under the
+ * legal limit: the last minute in the next 24h where BAC >= limit, plus 1.
+ * Returns `nowMin` if already durably below. Returns `null` if still at or over
+ * the limit at the end of the 24h window (no safe time to announce).
  */
 export function driveTimeMinute(
 	drinks: Drink[],
 	profile: Profile,
 	stomach: StomachState,
 	nowMin: number
-): number {
+): number | null {
 	const items = toAbsorbed(drinks, nowMin);
 	if (items.length === 0) return nowMin;
 	const r = WIDMARK_R[profile.sexe];
 	const rise = STOMACH_RISE_MIN[stomach];
 	const limit = legalLimit(profile.jeunePermis);
-	const { firstStart, bac } = trajectory(items, profile.poids, r, rise, nowMin + DAY);
+	const horizon = nowMin + DAY;
+	const { firstStart, bac } = trajectory(items, profile.poids, r, rise, horizon);
 	let lastOver = -1;
-	for (let t = nowMin; t <= nowMin + DAY; t++) {
-		if (bac[t - firstStart] > limit) lastOver = t;
+	for (let t = nowMin; t <= horizon; t++) {
+		if (bac[t - firstStart] >= limit) lastOver = t;
 	}
-	return lastOver === -1 ? nowMin : Math.min(lastOver + 1, nowMin + DAY);
+	if (lastOver === -1) return nowMin;
+	const candidate = lastOver + 1;
+	if (candidate > horizon) return null;
+	if (bac[candidate - firstStart] >= limit) return null;
+	return candidate;
 }
 
 export interface CurvePoint {
@@ -208,7 +212,8 @@ export interface ProjectionTimeline {
 	fromMin: number;
 	nowMin: number;
 	firstDrinkMin: number;
-	driveMin: number;
+	/** null = still at/above limit within the next 24h (no time to show). */
+	driveMin: number | null;
 	limit: number;
 	toMin: number;
 	points: TimelinePoint[];
@@ -238,12 +243,14 @@ export function buildProjectionTimeline(
 	let toMin: number;
 	if (drinks.length === 0) {
 		toMin = nowMin + SOBER_SPAN_MIN;
+	} else if (driveMin === null) {
+		toMin = nowMin + DAY;
 	} else if (driveMin > nowMin) {
 		const items = toAbsorbed(drinks, nowMin);
 		const r = WIDMARK_R[profile.sexe];
 		const rise = STOMACH_RISE_MIN[stomach];
 		const bacAtDrive = bacAtMinute(items, profile.poids, r, rise, driveMin);
-		toMin = bacAtDrive > limit ? driveMin + TIMELINE_MARGIN_MIN : driveMin;
+		toMin = bacAtDrive >= limit ? driveMin + TIMELINE_MARGIN_MIN : driveMin;
 	} else {
 		toMin = nowMin + SOBER_SPAN_MIN;
 	}
@@ -265,7 +272,14 @@ export function buildProjectionTimeline(
 			bac: traj && idx >= 0 && idx < traj.bac.length ? traj.bac[idx] : 0
 		});
 	}
-	const peakBac = Math.max(0, ...points.map((p) => p.bac));
+	let peakBac = 0;
+	if (traj) {
+		const end = Math.round(toMin);
+		for (let t = Math.round(fromMin); t <= end; t++) {
+			const idx = t - traj.firstStart;
+			if (idx >= 0 && idx < traj.bac.length) peakBac = Math.max(peakBac, traj.bac[idx]);
+		}
+	}
 
 	return {
 		fromMin,

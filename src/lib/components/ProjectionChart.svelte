@@ -23,9 +23,26 @@
 		return 90 - (bac / maxY) * 80;
 	}
 
+	function bacAtTMin(tMin: number): number {
+		if (points.length === 0) return 0;
+		if (tMin <= points[0].tMin) return points[0].bac;
+		const last = points[points.length - 1];
+		if (tMin >= last.tMin) return last.bac;
+		for (let i = 1; i < points.length; i++) {
+			const a = points[i - 1];
+			const b = points[i];
+			if (tMin <= b.tMin) {
+				const spanT = b.tMin - a.tMin;
+				if (spanT <= 0) return b.bac;
+				const frac = (tMin - a.tMin) / spanT;
+				return a.bac + frac * (b.bac - a.bac);
+			}
+		}
+		return 0;
+	}
+
 	function markerCy(tMin: number): number {
-		const pt = points.find((p) => Math.abs(p.tMin - tMin) < 1);
-		return y(pt?.bac ?? 0);
+		return y(bacAtTMin(tMin));
 	}
 
 	const linePath = $derived(
@@ -35,16 +52,21 @@
 	);
 	const limitY = $derived(y(limit));
 
-	const markers = $derived([
-		{ key: 'start', tMin: firstDrinkMin, label: 'Début', sub: formatMinuteOfDay(firstDrinkMin) },
-		{ key: 'now', tMin: nowMin, label: 'Maintenant', sub: formatMinuteOfDay(nowMin) },
-		{
-			key: 'drive',
-			tMin: driveMin,
-			label: driveMin <= nowMin ? 'Sous le seuil' : 'Conduite',
-			sub: formatMinuteOfDay(driveMin)
+	const markers = $derived.by(() => {
+		const list = [
+			{ key: 'start', tMin: firstDrinkMin, label: 'Début', sub: formatMinuteOfDay(firstDrinkMin) },
+			{ key: 'now', tMin: nowMin, label: 'Maintenant', sub: formatMinuteOfDay(nowMin) }
+		];
+		if (driveMin !== null) {
+			list.push({
+				key: 'drive',
+				tMin: driveMin,
+				label: driveMin <= nowMin ? 'Sous le seuil' : 'Conduite',
+				sub: formatMinuteOfDay(driveMin)
+			});
 		}
-	]);
+		return list;
+	});
 </script>
 
 <section class="glass-card overflow-hidden rounded-3xl p-6 shadow-sm">
