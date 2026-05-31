@@ -25,8 +25,11 @@ sensible des données).
 
 **Profil** (saisi une fois, mémorisé) :
 - `poids` (kg)
-- `sexe` : homme / femme → coefficient de Widmark `r` (0,68 H / 0,55 F)
+- `sexe` : homme / femme → coefficient de Widmark `r` (**0,70 H / 0,60 F**)
 - `jeunePermis` (checkbox) → seuil légal : **0,2 g/L** si coché, sinon **0,5 g/L**
+
+**État estomac** (réglage de session, près de la saisie) : vide / a grignoté /
+repas complet → ajuste la durée de la phase de montée (voir calcul).
 
 **Consommations** : liste de verres. Chaque verre =
 - `type` (bière / vin / shot / cocktail / spiritueux)
@@ -45,6 +48,10 @@ sensible des données).
 
 ## Calcul de l'alcoolémie (Widmark)
 
+On utilise **uniquement la formule métrique** (A en grammes, poids en kg, taux en
+g/L). La variante impériale `BAC = A × 5,14 / W × r − 0,015 H` (onces / livres / %)
+n'est **pas** utilisée — mélanger les deux fausserait le résultat d'un facteur ~10.
+
 **Alcool pur d'un verre (g)** :
 ```
 alcool_g = volume_ml × (degre / 100) × 0,789
@@ -52,14 +59,24 @@ alcool_g = volume_ml × (degre / 100) × 0,789
 (0,789 = densité de l'éthanol)
 
 **Phase de montée** : après chaque verre, l'alcool n'est pas absorbé
-instantanément. On modélise simplement une **montée linéaire sur 30 min** :
-la contribution d'un verre passe de 0 à son max entre `heure` et `heure + 30 min`,
-puis reste pleine.
+instantanément. On modélise une **montée linéaire** dont la durée dépend de l'état
+de l'estomac (réglage de session) :
 
-Soit `t` = minutes écoulées depuis la consommation du verre :
+| État estomac | Durée de montée |
+|--------------|-----------------|
+| Estomac vide | 30 min |
+| A grignoté | 60 min |
+| Repas complet | 90 min |
+
+La contribution d'un verre passe de 0 à son max entre `heure` et
+`heure + durée_montée`, puis reste pleine. Soit `t` = minutes écoulées depuis la
+consommation du verre et `m` = durée de montée :
 - si `t < 0` : contribution = 0 (verre dans le futur)
-- si `0 ≤ t < 30` : fraction absorbée = `t / 30`
-- si `t ≥ 30` : fraction absorbée = 1
+- si `0 ≤ t < m` : fraction absorbée = `t / m`
+- si `t ≥ m` : fraction absorbée = 1
+
+Manger ne fait pas éliminer l'alcool plus vite : ça étale la courbe et abaisse le
+pic, mais l'heure finale de retour sous le seuil bouge peu.
 
 **Contribution d'un verre au taux brut (g/L)**, avant élimination :
 ```
