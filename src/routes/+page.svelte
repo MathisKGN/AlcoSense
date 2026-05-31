@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { profile, drinks, session } from '$lib/stores.svelte';
-	import { bacNow, driveTimeMinute } from '$lib/widmark';
+	import { bacNow, buildProjectionTimeline, driveTimeMinute } from '$lib/widmark';
 	import { legalLimit } from '$lib/types';
 	import BacPanel from '$lib/components/BacPanel.svelte';
 	import ProjectionChart from '$lib/components/ProjectionChart.svelte';
@@ -19,10 +19,13 @@
 	const limit = $derived(legalLimit(profile.jeunePermis));
 	const bac = $derived(bacNow(drinks, profile, session.stomach, now));
 	const driveMin = $derived(driveTimeMinute(drinks, profile, session.stomach, nowMin));
+	const timeline = $derived(
+		buildProjectionTimeline(drinks, profile, session.stomach, nowMin)
+	);
 </script>
 
 <BacPanel {bac} {limit} {driveMin} {nowMin} />
-<ProjectionChart {bac} {drinks} {profile} stomach={session.stomach} {limit} {nowMin} {driveMin} />
+<ProjectionChart {timeline} />
 
 <section class="space-y-4">
 	<QuickAdd />
