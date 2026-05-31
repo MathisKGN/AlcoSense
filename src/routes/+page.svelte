@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { profile, drinks, session } from '$lib/stores.svelte';
-	import { bacNow, buildProjectionTimeline, driveTimeMinute } from '$lib/widmark';
-	import { legalLimit } from '$lib/types';
-	import BacPanel from '$lib/components/BacPanel.svelte';
+	import { bacNow, buildProjectionTimeline } from '$lib/widmark';
+	import BacSummary from '$lib/components/BacSummary.svelte';
 	import ProjectionChart from '$lib/components/ProjectionChart.svelte';
 	import QuickAdd from '$lib/components/QuickAdd.svelte';
 	import DrinkList from '$lib/components/DrinkList.svelte';
 	import ProfileForm from '$lib/components/ProfileForm.svelte';
 
-	// Live clock: re-evaluate every minute so the estimate stays current.
 	let now = $state(new Date());
 	$effect(() => {
 		const id = setInterval(() => (now = new Date()), 60_000);
@@ -16,20 +14,18 @@
 	});
 
 	const nowMin = $derived(now.getHours() * 60 + now.getMinutes());
-	const limit = $derived(legalLimit(profile.jeunePermis));
 	const bac = $derived(bacNow(drinks, profile, session.stomach, now));
-	const driveMin = $derived(driveTimeMinute(drinks, profile, session.stomach, nowMin));
 	const timeline = $derived(
 		buildProjectionTimeline(drinks, profile, session.stomach, nowMin)
 	);
+	const limit = $derived(timeline.limit);
+	const driveMin = $derived(timeline.driveMin);
 </script>
 
-<BacPanel {bac} {limit} {driveMin} {nowMin} />
-<ProjectionChart {timeline} />
-
-<section class="space-y-4">
+<div class="space-y-4">
+	<BacSummary {bac} {limit} {driveMin} {nowMin} />
 	<QuickAdd />
 	<DrinkList />
-</section>
-
-<ProfileForm />
+	<ProjectionChart {timeline} />
+	<ProfileForm />
+</div>
