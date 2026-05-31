@@ -1,0 +1,545 @@
+<!DOCTYPE html><html class="light" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>AlcoSense | Précision Biométrique</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#faf8ff",
+                    "secondary-fixed-dim": "#ffb2b7",
+                    "primary-fixed": "#6ffbbe",
+                    "error": "#ba1a1a",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed-dim": "#4edea3",
+                    "tertiary": "#494bd6",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-highest": "#dae2fd",
+                    "secondary-container": "#dc2c4f",
+                    "on-surface-variant": "#3c4a42",
+                    "inverse-primary": "#4edea3",
+                    "on-secondary-fixed-variant": "#92002a",
+                    "on-primary-fixed-variant": "#005236",
+                    "surface-dim": "#d2d9f4",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#2f2ebe",
+                    "on-primary": "#ffffff",
+                    "background": "#faf8ff",
+                    "primary-container": "#10b981",
+                    "surface-variant": "#dae2fd",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#eaedff",
+                    "on-primary-container": "#00422b",
+                    "secondary-fixed": "#ffdadb",
+                    "on-tertiary-container": "#1d17b2",
+                    "on-background": "#131b2e",
+                    "tertiary-fixed-dim": "#c0c1ff",
+                    "outline-variant": "#bbcabf",
+                    "surface-container-high": "#e2e7ff",
+                    "tertiary-container": "#9699ff",
+                    "on-surface": "#131b2e",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#e1e0ff",
+                    "secondary": "#b90538",
+                    "surface-container-low": "#f2f3ff",
+                    "outline": "#6c7a71",
+                    "on-secondary-container": "#fffbff",
+                    "inverse-surface": "#283044",
+                    "on-secondary-fixed": "#40000d",
+                    "on-primary-fixed": "#002113",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#07006c",
+                    "primary": "#006c49",
+                    "surface-tint": "#006c49",
+                    "surface-bright": "#faf8ff",
+                    "inverse-on-surface": "#eef0ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "element-margin": "0.75rem",
+                    "container-padding": "1.5rem",
+                    "stack-gap": "1.25rem",
+                    "glass-padding": "1.25rem"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "display-bac": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "data-point": ["Inter"],
+                    "label-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "display-bac": ["96px", {"lineHeight": "96px", "letterSpacing": "-0.05em", "fontWeight": "100"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "30px", "fontWeight": "600"}],
+                    "data-point": ["18px", {"lineHeight": "26px", "fontWeight": "300"}],
+                    "label-sm": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            backdrop-filter: blur(24px);
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(0.9); }
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #006c49;
+            border: 4px solid white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #dae2fd;
+            border-radius: 10px;
+        }
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .chart-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 2s ease-out forwards;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+</head>
+<body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container bg-surface-bright font-body-md">
+<!-- Mobile Header -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface-bright/90 backdrop-blur-xl border-b border-surface-container/50">
+<div class="px-container-padding py-4 flex items-center justify-between">
+<span class="font-headline-lg text-xl font-bold tracking-tighter text-primary">AlcoSense</span>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-surface-container transition-colors">history</span>
+<span class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-surface-container transition-colors">person</span>
+</div>
+</div>
+</header>
+<main class="min-h-screen pt-24 pb-32">
+<div class="max-w-md mx-auto px-container-padding space-y-stack-gap">
+<!-- BAC Hero Section -->
+<section class="flex flex-col items-center text-center py-6">
+<div class="inline-flex items-center gap-2 mb-2">
+<span class="pulse-dot w-2 h-2 bg-primary rounded-full"></span>
+<span class="text-[11px] font-label-sm text-primary uppercase tracking-[0.2em] font-bold">Estimation Directe</span>
+</div>
+<div class="relative">
+<h1 class="font-display-bac text-display-bac text-on-surface leading-none transition-all duration-700" id="bac-display">0,24</h1>
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-[0.2em] block mt-2">g/L de sang</span>
+</div>
+</section>
+<!-- Status Card -->
+<div class="rounded-full px-6 py-4 flex items-center gap-4 bg-primary-container/10 border border-primary/20 transition-all duration-500 shadow-sm" id="safety-card">
+<span class="material-symbols-outlined text-2xl text-primary" id="safety-icon">check_circle</span>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-primary-container leading-none mb-1" id="safety-title">Apte à la conduite</p>
+<p class="text-[11px] text-on-primary-container opacity-70" id="safety-desc">Limite légale : 0,5 g/L</p>
+</div>
+</div>
+<!-- Projection Section -->
+<section class="bg-surface-container-lowest rounded-xl p-6 border border-surface-container shadow-sm overflow-hidden">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-label-sm font-bold text-outline uppercase tracking-wider">Projection Temporelle</h3>
+<span class="text-[11px] text-primary font-bold" id="sobriety-timer">01h38 restant</span>
+</div>
+<div class="h-40 w-full relative mb-4">
+<!-- SVG Chart -->
+<svg class="w-full h-full overflow-visible" id="bac-chart" preserveAspectRatio="none" viewBox="0 0 100 100">
+<defs>
+<linearGradient id="chartGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#006c49" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#006c49" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<!-- Axes -->
+<line class="stroke-surface-container" stroke-width="0.5" x1="0" x2="100" y1="90" y2="90"></line>
+<line class="stroke-surface-container" stroke-width="0.5" x1="0" x2="0" y1="10" y2="90"></line>
+<!-- Area & Path will be injected here -->
+<path class="fill-none stroke-primary chart-path" d="M0,70.4952380952381 L100,90" id="chart-line" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<path class="fill-[url(#chartGradient)] opacity-50" d="M0,70.4952380952381 L100,90 L100,90 L0,90 Z" id="chart-area"></path>
+<!-- Limit Line -->
+<line class="stroke-secondary/30" id="limit-line" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="100" y1="50" y2="50"></line>
+</svg>
+<!-- Labels -->
+<div class="absolute -bottom-6 left-0 text-[9px] text-outline uppercase font-bold">Maintenant</div>
+<div class="absolute -bottom-6 right-0 text-[9px] text-outline uppercase font-bold" id="end-time-label">Sobriété</div>
+</div>
+</section>
+<!-- Consommations Section -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-headline-lg-mobile font-bold text-on-surface">Consommations</h2>
+<div class="flex items-center gap-3">
+<span class="bg-surface-container text-primary font-bold px-3 py-1 rounded-full text-xs" id="drink-count">1</span>
+<button class="p-2 text-outline-variant hover:text-error transition-colors" onclick="resetDrinks()">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+</div>
+</div>
+<!-- Quick Add Horizontal Scroll -->
+<div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-container-padding px-container-padding">
+<button class="flex flex-col items-center gap-2 min-w-[80px] p-4 bg-white rounded-xl border border-surface-container shadow-sm active:scale-95 transition-transform group" onclick="quickAdd('biere')">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">sports_bar</span>
+<span class="text-[10px] font-bold uppercase">Bière</span>
+</button>
+<button class="flex flex-col items-center gap-2 min-w-[80px] p-4 bg-white rounded-xl border border-surface-container shadow-sm active:scale-95 transition-transform group" onclick="quickAdd('vin')">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">wine_bar</span>
+<span class="text-[10px] font-bold uppercase">Vin</span>
+</button>
+<button class="flex flex-col items-center gap-2 min-w-[80px] p-4 bg-white rounded-xl border border-surface-container shadow-sm active:scale-95 transition-transform group" onclick="quickAdd('shot')">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">liquor</span>
+<span class="text-[10px] font-bold uppercase">Shot</span>
+</button>
+<button class="flex flex-col items-center gap-2 min-w-[80px] p-4 bg-white rounded-xl border border-surface-container shadow-sm active:scale-95 transition-transform group" onclick="quickAdd('cocktail')">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">local_bar</span>
+<span class="text-[10px] font-bold uppercase">Cocktail</span>
+</button>
+
+</div>
+<!-- Detailed List -->
+<div class="space-y-3" id="drink-list">
+            <div class="flex items-center gap-3 p-4 bg-white rounded-xl border border-surface-container shadow-sm">
+                <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-surface-container text-primary">
+                    <span class="material-symbols-outlined">glass_full</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-sm font-bold block truncate">Spiritueux</span>
+                            <span class="text-[10px] text-outline uppercase font-bold">40ml • 40%</span>
+                        </div>
+                        <input type="time" value="13:16" onchange="updateDrink(1780226192174, 'time', this.value)" class="text-[11px] font-bold text-primary bg-primary-container/10 border-none rounded px-2 py-1 focus:ring-0">
+                    </div>
+                </div>
+                <button onclick="removeDrink(1780226192174)" class="text-outline-variant hover:text-error p-2">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            </div>
+        </div>
+</section>
+<!-- Profile & Settings Collapsible -->
+<section class="bg-surface-container-low/50 rounded-xl p-6 space-y-6">
+<h3 class="text-label-sm font-bold text-outline uppercase tracking-wider">Configuration Profil</h3>
+<div class="space-y-stack-gap">
+<!-- Genre -->
+<div>
+<label class="text-[11px] font-bold text-outline uppercase mb-3 block">Genre</label>
+<div class="flex p-1 bg-white rounded-full border border-surface-container">
+<button class="flex-1 py-2.5 rounded-full text-label-sm font-bold bg-primary text-white shadow-md transition-all" id="btn-male" onclick="setGender('M')">Homme</button>
+<button class="flex-1 py-2.5 rounded-full text-label-sm font-bold text-outline-variant hover:text-on-surface transition-all" id="btn-female" onclick="setGender('F')">Femme</button>
+</div>
+</div>
+<!-- Poids -->
+<div>
+<div class="flex justify-between items-center mb-4">
+<label class="text-[11px] font-bold text-outline uppercase">Poids Corporel</label>
+<span class="text-sm font-bold text-primary bg-primary-container/10 px-3 py-1 rounded-full" id="weight-label">75 kg</span>
+</div>
+<input class="w-full h-2 bg-surface-container rounded-full appearance-none cursor-pointer accent-primary" id="weight-slider" max="150" min="40" oninput="updateWeight(this.value)" type="range" value="75">
+</div>
+<!-- Stomach State -->
+<div>
+<label class="text-[11px] font-bold text-outline uppercase mb-3 block">État de l'estomac</label>
+<div class="grid grid-cols-1 gap-2">
+<button class="stomach-btn text-left p-4 rounded-xl border border-white bg-white hover:border-primary/50 transition-all shadow-sm ring-2 ring-primary/20" id="stomach-empty" onclick="setStomach('empty')">
+<span class="font-bold text-sm block leading-none mb-1">À jeun</span>
+<span class="text-[11px] text-outline">Absorption maximale</span>
+</button>
+<button class="stomach-btn text-left p-4 rounded-xl border border-white bg-white hover:border-primary/50 transition-all shadow-sm" id="stomach-full" onclick="setStomach('full')">
+<span class="font-bold text-sm block leading-none mb-1">Repas complet</span>
+<span class="text-[11px] text-outline">Absorption ralentie</span>
+</button>
+</div>
+</div>
+<!-- Young Driver -->
+<div class="flex items-center justify-between p-4 bg-white rounded-xl border border-surface-container">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Jeune conducteur</span>
+<span class="text-[11px] text-outline">Limite réduite à 0,2 g/L</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" id="young-driver" onchange="updateYoungDriver(this.checked)" type="checkbox">
+<div class="w-11 h-6 bg-surface-container peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Sticky Footer Label -->
+<footer class="fixed bottom-0 left-0 right-0 p-4 bg-surface-bright/80 backdrop-blur-md border-t border-surface-container safe-bottom">
+<div class="max-w-md mx-auto flex justify-between items-center text-[11px] text-outline font-bold uppercase tracking-widest">
+<span class="">© 2024 AlcoSense</span>
+<div class="flex gap-4">
+<a href="#" class="">Légal</a>
+<a href="#" class="">Sécurité</a>
+</div>
+</div>
+</footer>
+<script>
+    let drinks = [];
+    let userProfile = {
+        gender: 'M',
+        weight: 75,
+        isYoungDriver: false,
+        stomachState: 'empty'
+    };
+
+    const drinkPresets = {
+        biere: { name: 'Bière', icon: 'sports_bar', vol: 250, deg: 5 },
+        vin: { name: 'Vin', icon: 'wine_bar', vol: 120, deg: 12 },
+        shot: { name: 'Shot', icon: 'liquor', vol: 40, deg: 40 },
+        cocktail: { name: 'Cocktail', icon: 'local_bar', vol: 150, deg: 15 },
+        spirit: { name: 'Spiritueux', icon: 'glass_full', vol: 40, deg: 40 }
+    };
+
+    function setGender(g) {
+        userProfile.gender = g;
+        const maleBtn = document.getElementById('btn-male');
+        const femaleBtn = document.getElementById('btn-female');
+        
+        if (g === 'M') {
+            maleBtn.className = 'flex-1 py-2.5 rounded-full text-label-sm font-bold bg-primary text-white shadow-md transition-all';
+            femaleBtn.className = 'flex-1 py-2.5 rounded-full text-label-sm font-bold text-outline-variant hover:text-on-surface transition-all';
+        } else {
+            femaleBtn.className = 'flex-1 py-2.5 rounded-full text-label-sm font-bold bg-primary text-white shadow-md transition-all';
+            maleBtn.className = 'flex-1 py-2.5 rounded-full text-label-sm font-bold text-outline-variant hover:text-on-surface transition-all';
+        }
+        calculateBAC();
+    }
+
+    function updateWeight(val) {
+        userProfile.weight = parseInt(val);
+        document.getElementById('weight-label').innerText = `${val} kg`;
+        calculateBAC();
+    }
+
+    function updateYoungDriver(val) {
+        userProfile.isYoungDriver = val;
+        calculateBAC();
+    }
+
+    function setStomach(state) {
+        userProfile.stomachState = state;
+        const buttons = document.querySelectorAll('.stomach-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('ring-2', 'ring-primary/20', 'border-primary/50');
+            btn.classList.add('border-white');
+        });
+        const active = document.getElementById(`stomach-${state}`);
+        active.classList.add('ring-2', 'ring-primary/20', 'border-primary/50');
+        active.classList.remove('border-white');
+        calculateBAC();
+    }
+
+    function quickAdd(type) {
+        const preset = drinkPresets[type];
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        
+        const newDrink = {
+            id: Date.now(),
+            name: preset.name,
+            icon: preset.icon,
+            vol: preset.vol,
+            deg: preset.deg,
+            time: timeStr
+        };
+        
+        drinks.push(newDrink);
+        renderDrinkList();
+        calculateBAC();
+    }
+
+    function updateDrink(id, field, value) {
+        const drink = drinks.find(d => d.id === id);
+        if (drink) {
+            drink[field] = field === 'time' ? value : parseFloat(value);
+            calculateBAC();
+        }
+    }
+
+    function removeDrink(id) {
+        drinks = drinks.filter(d => d.id !== id);
+        renderDrinkList();
+        calculateBAC();
+    }
+
+    function resetDrinks() {
+        drinks = [];
+        renderDrinkList();
+        calculateBAC();
+    }
+
+    function renderDrinkList() {
+        const container = document.getElementById('drink-list');
+        if (drinks.length === 0) {
+            container.innerHTML = `<div class="text-center py-10 text-outline opacity-40 italic text-sm border-2 border-dashed border-surface-container rounded-xl bg-white/50">Aucune boisson ajoutée</div>`;
+            return;
+        }
+
+        container.innerHTML = drinks.map(drink => `
+            <div class="flex items-center gap-3 p-4 bg-white rounded-xl border border-surface-container shadow-sm">
+                <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-surface-container text-primary">
+                    <span class="material-symbols-outlined">${drink.icon}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-sm font-bold block truncate">${drink.name}</span>
+                            <span class="text-[10px] text-outline uppercase font-bold">${drink.vol}ml • ${drink.deg}%</span>
+                        </div>
+                        <input type="time" value="${drink.time}" onchange="updateDrink(${drink.id}, 'time', this.value)" class="text-[11px] font-bold text-primary bg-primary-container/10 border-none rounded px-2 py-1 focus:ring-0">
+                    </div>
+                </div>
+                <button onclick="removeDrink(${drink.id})" class="text-outline-variant hover:text-error p-2">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function calculateBAC() {
+        let totalAlcoholGrams = 0;
+        drinks.forEach(d => {
+            totalAlcoholGrams += (d.vol * (d.deg / 100) * 0.8);
+        });
+
+        const r = userProfile.gender === 'M' ? 0.7 : 0.6;
+        let bac = totalAlcoholGrams / (userProfile.weight * r);
+        
+        let absorptionFactor = 1.0;
+        if (userProfile.stomachState === 'full') absorptionFactor = 0.75;
+        
+        bac = bac * absorptionFactor;
+
+        updateUI(bac);
+        updateChart(bac);
+    }
+
+    function updateChart(currentBac) {
+        const path = document.getElementById('chart-line');
+        const area = document.getElementById('chart-area');
+        const limitLine = document.getElementById('limit-line');
+        const sobrietyLabel = document.getElementById('sobriety-timer');
+        
+        const limit = userProfile.isYoungDriver ? 0.2 : 0.5;
+        
+        // Elimination rate: ~0.15g/L per hour
+        const eliminationRate = 0.15;
+        const hoursToZero = currentBac > 0 ? (currentBac / eliminationRate) : 0;
+        
+        // Update SVG Path
+        // X: 0 to 100 representing now to sobriety
+        // Y: 90 is 0.0, 10 is max BAC or 1.0
+        const maxY = Math.max(currentBac, 1.0);
+        const startY = 90 - (currentBac / maxY * 80);
+        const limitY = 90 - (limit / maxY * 80);
+        
+        limitLine.setAttribute('y1', limitY);
+        limitLine.setAttribute('y2', limitY);
+
+        if (currentBac === 0) {
+            path.setAttribute('d', 'M0,90 L100,90');
+            area.setAttribute('d', 'M0,90 L100,90 L100,90 L0,90 Z');
+            sobrietyLabel.innerText = "00:00 restant";
+            return;
+        }
+
+        // Simple linear decrease for visualization
+        const points = [];
+        points.push(`0,${startY}`);
+        points.push(`100,90`);
+        
+        const pathData = `M${points.join(' L')}`;
+        path.setAttribute('d', pathData);
+        area.setAttribute('d', `${pathData} L100,90 L0,90 Z`);
+
+        // Timer calculation
+        const hours = Math.floor(hoursToZero);
+        const minutes = Math.round((hoursToZero - hours) * 60);
+        sobrietyLabel.innerText = `${hours.toString().padStart(2, '0')}h${minutes.toString().padStart(2, '0')} restant`;
+    }
+
+    function updateUI(bac) {
+        const display = document.getElementById('bac-display');
+        const drinkCountDisplay = document.getElementById('drink-count');
+        const safetyCard = document.getElementById('safety-card');
+        const safetyIcon = document.getElementById('safety-icon');
+        const safetyTitle = document.getElementById('safety-title');
+        const safetyDesc = document.getElementById('safety-desc');
+
+        const formattedBAC = bac.toFixed(2).replace('.', ',');
+        display.innerText = formattedBAC;
+        drinkCountDisplay.innerText = drinks.length;
+
+        const limit = userProfile.isYoungDriver ? 0.2 : 0.5;
+
+        if (bac >= limit) {
+            display.classList.add('text-secondary');
+            display.classList.remove('text-on-surface');
+            safetyCard.classList.remove('bg-primary-container/10', 'border-primary/20');
+            safetyCard.classList.add('bg-secondary-container/10', 'border-secondary/20');
+            safetyIcon.innerText = 'warning';
+            safetyIcon.className = 'material-symbols-outlined text-2xl text-secondary';
+            safetyTitle.innerText = 'Conduite Interdite';
+            safetyTitle.classList.add('text-secondary');
+            safetyDesc.innerText = `Attention : Seuil de ${limit.toFixed(1).replace('.', ',')} g/L atteint`;
+        } else {
+            display.classList.remove('text-secondary');
+            display.classList.add('text-on-surface');
+            safetyCard.classList.add('bg-primary-container/10', 'border-primary/20');
+            safetyCard.classList.remove('bg-secondary-container/10', 'border-secondary/20');
+            safetyIcon.innerText = 'check_circle';
+            safetyIcon.className = 'material-symbols-outlined text-2xl text-primary';
+            safetyTitle.innerText = 'Apte à la conduite';
+            safetyTitle.classList.remove('text-secondary');
+            safetyDesc.innerText = `Limite légale : ${limit.toFixed(1).replace('.', ',')} g/L`;
+        }
+    }
+
+    // Initialize
+    updateChart(0);
+</script>
+
+
+</body></html>
