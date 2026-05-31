@@ -21,13 +21,13 @@
 <header
 	class="fixed top-0 right-0 left-0 z-50 border-b border-surface-container/50 bg-surface-bright/90 backdrop-blur-xl"
 >
-	<div class="mx-auto flex max-w-md items-center justify-between px-6 py-4">
+	<div class="mx-auto flex max-w-md items-center justify-between px-6 py-3">
 		<span class="text-xl font-bold tracking-tighter text-primary">AlcoSense</span>
 		<span class="pulse-dot h-2 w-2 rounded-full bg-primary" aria-hidden="true"></span>
 	</div>
 </header>
 
-<main class="min-h-screen pt-24 pb-32">
+<main class="min-h-screen pt-20 pb-24">
 	<div class="mx-auto max-w-md space-y-5 px-6">
 		{@render children()}
 	</div>
