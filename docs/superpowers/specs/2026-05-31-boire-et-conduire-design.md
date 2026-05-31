@@ -165,6 +165,32 @@ couleur, typo, rayons et espacements définis dans `DESIGN.md` (frontmatter).
 > phase de montée selon l'estomac, élimination, échantillonnage). On reprend le
 > look de la maquette, pas sa logique.
 
+## UI / UX mobile direct
+
+> **Remplace** le scénario « bottom sheet » + graphique repliable du plan
+> `ux-refonte` — **ne pas implémenter** cette variante.
+
+**Saisie des verres** — pas de modal ni de bottom sheet. Chaque ligne de la liste
+expose **deux champs numériques inline** (volume en cl, degré en %) et un
+**champ heure natif** (`<input type="time">`) pour l'heure de consommation.
+
+**Ordre de la page d'accueil** (colonne unique, de haut en bas) :
+1. `BacSummary` — carte compacte (taux + message), **pas** de grand hero `BacPanel`
+2. `QuickAdd`
+3. `DrinkList`
+4. `ProjectionChart` — **toujours visible**, non repliable
+5. `ProfileForm`
+
+**Graphique de projection** — affiché en permanence sur l'accueil. Axe des
+abscisses : du **premier verre** jusqu'à la fenêtre conduite / sous le seuil ; le
+**maintenant** n'est pas l'origine (x = 0) mais un **repère sur la courbe**.
+Repères verticaux : **Début** (premier verre), **Maintenant**, **Conduite** (ou
+**Sous le seuil** si déjà atteint). Grille X : un tick toutes les **15 min** si
+l'étendue ≤ 4 h, sinon toutes les **30 min**.
+
+**Vocabulaire UI** — éviter « Sobriété » seul ; préférer **« Sous le seuil »** et
+**« heure de conduite »** (ou « Tu peux conduire à HH:MM »).
+
 ## Découpage en composants (isolation)
 
 - `lib/widmark.ts` — calcul pur (alcool d'un verre, taux à instant t, heure de
