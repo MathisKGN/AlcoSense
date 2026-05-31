@@ -1,0 +1,82 @@
+@import 'tailwindcss';
+
+@theme {
+	--color-surface: #faf8ff;
+	--color-surface-bright: #faf8ff;
+	--color-surface-dim: #d2d9f4;
+	--color-surface-container-lowest: #ffffff;
+	--color-surface-container-low: #f2f3ff;
+	--color-surface-container: #eaedff;
+	--color-surface-container-high: #e2e7ff;
+	--color-surface-container-highest: #dae2fd;
+	--color-on-surface: #131b2e;
+	--color-on-surface-variant: #3c4a42;
+	--color-outline: #6c7a71;
+	--color-outline-variant: #bbcabf;
+	--color-primary: #006c49;
+	--color-on-primary: #ffffff;
+	--color-primary-container: #10b981;
+	--color-on-primary-container: #00422b;
+	--color-secondary: #b90538;
+	--color-secondary-container: #dc2c4f;
+	--color-on-secondary-container: #fffbff;
+	--color-error: #ba1a1a;
+
+	/* Warning (orange) — "near limit / absorbing" zone. Not in the maquette
+	   tokens; a desaturated amber that fits the Studio White palette. */
+	--color-warning: #8a5300;
+	--color-warning-container: #f59e0b;
+
+	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Material Symbols base */
+.material-symbols-outlined {
+	font-family: 'Material Symbols Outlined';
+	font-weight: normal;
+	font-style: normal;
+	line-height: 1;
+	letter-spacing: normal;
+	text-transform: none;
+	display: inline-block;
+	white-space: nowrap;
+	word-wrap: normal;
+	direction: ltr;
+	font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Level-1 glass surface (DESIGN.md: blur 24px, translucent white, hairline border) */
+.glass-card {
+	backdrop-filter: blur(24px);
+	background: rgba(255, 255, 255, 0.85);
+	border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+/* Pulse dot for "live monitoring" indicator */
+.pulse-dot {
+	animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.5;
+		transform: scale(0.9);
+	}
+}
+
+/* Hide horizontal scrollbar on the quick-add row */
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+body {
+	font-family: var(--font-sans);
+}
