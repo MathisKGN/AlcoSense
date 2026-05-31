@@ -1,79 +1,74 @@
 <script lang="ts">
-	import { sampleCurve, type CurvePoint } from '$lib/widmark';
-	import type { Profile, StomachState } from '$lib/types';
+	import type { ProjectionTimeline } from '$lib/widmark';
+	import { formatMinuteOfDay, generateChartTicks, chartTickStepMin } from '$lib/format';
 
-	let {
-		bac,
-		drinks,
-		profile,
-		stomach,
-		limit,
-		nowMin,
-		driveMin
-	}: {
-		bac: number;
-		drinks: import('$lib/types').Drink[];
-		profile: Profile;
-		stomach: StomachState;
-		limit: number;
-		nowMin: number;
-		driveMin: number;
-	} = $props();
+	let { timeline }: { timeline: ProjectionTimeline } = $props();
 
-	// End of the window: drive time + 20 min margin, min 60 min span.
-	const toMin = $derived(driveMin > nowMin ? driveMin + 20 : nowMin + 60);
-	const points = $derived<CurvePoint[]>(
-		sampleCurve(drinks, profile, stomach, nowMin, toMin, 40)
-	);
-	const peakBac = $derived(Math.max(0, ...points.map((p) => p.bac)));
-	// Align scale with the hero readout: no exaggerated curve when BAC rounds to 0,00.
-	const maxBac = $derived.by(() => {
-		if (bac < 0.005 && peakBac < limit * 0.1) {
-			return limit;
-		}
-		return Math.max(limit, peakBac > 0 ? peakBac * 1.08 : 0);
-	});
+	const { fromMin, nowMin, firstDrinkMin, driveMin, limit, toMin, points, peakBac } =
+		$derived(timeline);
 
-	// Map a point to SVG viewBox 0..100 (x left→right, y 90 bottom = 0).
-	function x(p: CurvePoint): number {
-		const span = toMin - nowMin;
-		return span === 0 ? 0 : (p.minutesFromNow / span) * 100;
+	const span = $derived(Math.max(1, toMin - fromMin));
+	const maxY = $derived(Math.max(limit * 1.15, peakBac, 0.01));
+	const stepMin = $derived(chartTickStepMin(span));
+	const ticks = $derived(generateChartTicks(fromMin, toMin, stepMin));
+	const sparseTickLabels = $derived(ticks.length > 8);
+
+	function xFromStart(minutesFromStart: number): number {
+		return (minutesFromStart / span) * 100;
+	}
+	function xAt(tMin: number): number {
+		return ((tMin - fromMin) / span) * 100;
 	}
 	function y(bac: number): number {
-		return 90 - (bac / maxBac) * 80;
+		return 90 - (bac / maxY) * 80;
+	}
+
+	function markerCy(tMin: number): number {
+		const pt = points.find((p) => Math.abs(p.tMin - tMin) < 1);
+		return y(pt?.bac ?? 0);
 	}
 
 	const linePath = $derived(
-		points.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(p)},${y(p.bac)}`).join(' ')
+		points
+			.map((p, i) => `${i === 0 ? 'M' : 'L'}${xFromStart(p.minutesFromStart)},${y(p.bac)}`)
+			.join(' ')
 	);
-	const areaPath = $derived(`${linePath} L100,90 L0,90 Z`);
 	const limitY = $derived(y(limit));
 
-	const remainingMin = $derived(Math.max(0, driveMin - nowMin));
-	const timer = $derived(
-		remainingMin === 0
-			? 'Sous le seuil'
-			: `${String(Math.floor(remainingMin / 60)).padStart(2, '0')}h${String(
-					Math.round(remainingMin % 60)
-				).padStart(2, '0')} restant`
-	);
+	const markers = $derived([
+		{ key: 'start', tMin: firstDrinkMin, label: 'Début', sub: formatMinuteOfDay(firstDrinkMin) },
+		{ key: 'now', tMin: nowMin, label: 'Maintenant', sub: formatMinuteOfDay(nowMin) },
+		{
+			key: 'drive',
+			tMin: driveMin,
+			label: driveMin <= nowMin ? 'Sous le seuil' : 'Conduite',
+			sub: formatMinuteOfDay(driveMin)
+		}
+	]);
 </script>
 
 <section class="glass-card overflow-hidden rounded-3xl p-6 shadow-sm">
-	<div class="mb-6 flex items-center justify-between">
-		<h3 class="text-[13px] font-bold tracking-wider text-outline uppercase">Projection temporelle</h3>
-		<span class="text-[11px] font-bold text-primary">{timer}</span>
+	<div class="mb-4">
+		<h3 class="text-[13px] font-bold tracking-wider text-outline uppercase">Courbe dans le temps</h3>
+		<p class="text-[11px] text-outline">Limite légale {limit.toFixed(1).replace('.', ',')} g/L</p>
 	</div>
-	<div class="relative mb-4 h-40 w-full">
-		<svg class="h-full w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-			<defs>
-				<linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-					<stop offset="0%" stop-color="#006c49" stop-opacity="0.2" />
-					<stop offset="100%" stop-color="#006c49" stop-opacity="0" />
-				</linearGradient>
-			</defs>
+	<div class="relative mb-8 h-44 w-full">
+		<svg
+			class="h-full w-full overflow-visible"
+			preserveAspectRatio="none"
+			viewBox="0 0 100 100"
+		>
+			{#each ticks as tick (tick.tMin)}
+				<line
+					x1={tick.ratio * 100}
+					y1="90"
+					x2={tick.ratio * 100}
+					y2="88"
+					class="stroke-surface-container"
+					stroke-width="0.5"
+				/>
+			{/each}
 			<line x1="0" y1="90" x2="100" y2="90" class="stroke-surface-container" stroke-width="0.5" />
-			<path d={areaPath} fill="url(#chartGradient)" class="opacity-50" />
 			<path
 				d={linePath}
 				class="fill-none stroke-primary"
@@ -90,8 +85,29 @@
 				stroke-dasharray="2 2"
 				stroke-width="1"
 			/>
+			{#each markers as m (m.key)}
+				<line
+					x1={xAt(m.tMin)}
+					y1="12"
+					x2={xAt(m.tMin)}
+					y2="90"
+					class="stroke-primary/25"
+					stroke-width="0.75"
+				/>
+				<circle cx={xAt(m.tMin)} cy={markerCy(m.tMin)} r="2.5" class="fill-primary" />
+			{/each}
 		</svg>
-		<div class="absolute -bottom-6 left-0 text-[9px] font-bold text-outline uppercase">Maintenant</div>
-		<div class="absolute right-0 -bottom-6 text-[9px] font-bold text-outline uppercase">Sobriété</div>
+		<div class="pointer-events-none absolute inset-x-0 -bottom-7 flex justify-between text-[8px] font-bold text-outline">
+			{#each ticks as tick, i (tick.tMin)}
+				{#if !sparseTickLabels || i % 2 === 0 || i === ticks.length - 1}
+					<span style="left: {tick.ratio * 100}%" class="absolute -translate-x-1/2">{tick.label}</span>
+				{/if}
+			{/each}
+		</div>
 	</div>
+	<ul class="mt-2 flex flex-wrap gap-3 text-[10px] font-bold text-outline uppercase">
+		{#each markers as m (m.key)}
+			<li><span class="text-on-surface">{m.label}</span> {m.sub}</li>
+		{/each}
+	</ul>
 </section>
