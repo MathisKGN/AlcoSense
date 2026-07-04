@@ -1,42 +1,49 @@
-# sv
+# AlcoSense
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Estimateur d'alcoolémie (taux d'alcool dans le sang) basé sur la **formule de Widmark**.
+Application web mobile-first : on renseigne son profil et ses consommations, l'app estime
+le taux courant, trace la courbe dans le temps et indique l'heure à partir de laquelle la
+conduite redevient possible.
 
-## Creating a project
+> ⚠️ **Estimation indicative uniquement.** Les résultats ne remplacent pas un éthylotest et
+> ne doivent jamais servir de base pour décider de conduire.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Fonctionnalités
 
-```sh
-# create a new project
-npx sv create my-app
-```
+- **Profil** : genre, poids, état de l'estomac, jeune conducteur (limite 0,2 vs 0,5 g/L)
+- **Consommations** : presets (bière, vin, shot, cocktail, spiritueux), volume/degré/heure éditables
+- **Estimation temps réel** : taux courant, statut (apte / proche du seuil / absorption / interdit)
+- **Heure de reprise de conduite** ou message « pas d'heure fiable sous 24 h »
+- **Courbe de projection** dans le temps
+- **Persistance locale** (localStorage) — aucune donnée envoyée sur un serveur
 
-To recreate this project with the same configuration:
+## Stack technique
 
-```sh
-# recreate this project
-npx sv@0.15.3 create --template minimal --types ts --install npm .
-```
+SvelteKit 2 · Svelte 5 (runes) · TypeScript · Tailwind CSS 4 · adapter-static (site statique).
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
+## Développement
 
 ```sh
-npm run build
+npm install
+npm run dev          # serveur de dev
 ```
 
-You can preview the production build with `npm run preview`.
+## Tests
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```sh
+npm test             # tests unitaires (Vitest) — moteur Widmark + formatters
+npm run test:e2e     # tests end-to-end (Playwright) — parcours critiques P0
+npm run check        # vérification TypeScript / Svelte
+```
+
+Le carnet des cas de test E2E (180 cas) est documenté dans `e2e/carnet-tests-e2e.md`.
+
+## Build & déploiement
+
+```sh
+npm run build        # génère le site statique dans build/
+npm run preview      # prévisualise le build de prod
+```
+
+Le déploiement vers **GitHub Pages** est automatisé via `.github/workflows/deploy.yml`
+(à chaque push sur `main` : tests → build → déploiement).
