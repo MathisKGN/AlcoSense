@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { profile, drinks, session } from '$lib/stores.svelte';
-	import { bacNow, buildProjectionTimeline } from '$lib/widmark';
+	import { bacNow, peakFromMinute, buildProjectionTimeline } from '$lib/widmark';
 	import BacSummary from '$lib/components/BacSummary.svelte';
 	import ProjectionChart from '$lib/components/ProjectionChart.svelte';
 	import QuickAdd from '$lib/components/QuickAdd.svelte';
@@ -15,6 +15,7 @@
 
 	const nowMin = $derived(now.getHours() * 60 + now.getMinutes());
 	const bac = $derived(bacNow(drinks, profile, session.stomach, now));
+	const peak = $derived(peakFromMinute(drinks, profile, session.stomach, nowMin));
 	const timeline = $derived(
 		buildProjectionTimeline(drinks, profile, session.stomach, nowMin)
 	);
@@ -23,7 +24,7 @@
 </script>
 
 <div class="space-y-4">
-	<BacSummary {bac} {limit} {driveMin} {nowMin} />
+	<BacSummary {bac} {peak} {limit} {driveMin} {nowMin} />
 	<QuickAdd />
 	<DrinkList />
 	<ProjectionChart {timeline} />

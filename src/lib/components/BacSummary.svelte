@@ -3,15 +3,20 @@
 
 	let {
 		bac,
+		peak,
 		limit,
 		driveMin,
 		nowMin
-	}: { bac: number; limit: number; driveMin: number | null; nowMin: number } = $props();
+	}: { bac: number; peak: number; limit: number; driveMin: number | null; nowMin: number } =
+		$props();
 
 	const display = $derived(bac.toFixed(2).replace('.', ','));
 	const limitText = $derived(limit.toFixed(1).replace('.', ','));
 
 	type Status = 'over' | 'soon' | 'near' | 'safe';
+	// `peak` is the highest BAC still to come (pending absorption). Using it for the
+	// "near" band means the status warns right after drinking — when the current BAC
+	// is ~0 but the projected peak is close to the limit — instead of a false "safe".
 	const status: Status = $derived(
 		bac >= limit
 			? 'over'
@@ -19,7 +24,7 @@
 				? 'soon'
 				: driveMin > nowMin
 					? 'soon'
-					: bac >= 0.8 * limit
+					: peak >= 0.8 * limit
 						? 'near'
 						: 'safe'
 	);

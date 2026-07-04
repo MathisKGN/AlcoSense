@@ -7,16 +7,13 @@ test.describe('Persona', () => {
 		await gotoApp(page);
 	});
 
-	test('E2E-148 @P0 3 bieres bues plus tot dans la soiree → pas Apte', async ({ page }) => {
-		// Persona: a bu 3 bières en début de soirée (19:30), consulte l'app à 20:00.
-		// À jeun, 3 bières standard plafonnent à ~0,49 g/L (juste sous 0,5) : une fois
-		// absorbées, le taux courant place l'utilisateur en « Proche du seuil », pas « Apte ».
+	test('E2E-148 @P0 3 bieres sans configurer → pas Apte', async ({ page }) => {
+		// Ajoutées à l'instant (heure par défaut = maintenant). Le taux courant est ~0
+		// mais le pic projeté (~0,49 g/L) approche la limite : le statut doit refléter
+		// cette absorption à venir, donc « Proche du seuil » et pas « Apte à la conduite ».
 		await addDrink(page, 'Bière');
 		await addDrink(page, 'Bière');
 		await addDrink(page, 'Bière');
-		for (let i = 0; i < 3; i++) {
-			await page.getByLabel('Heure de consommation').nth(i).fill('19:30');
-		}
 
 		await expect(page.getByTestId('status-title')).not.toHaveText('Apte à la conduite');
 	});

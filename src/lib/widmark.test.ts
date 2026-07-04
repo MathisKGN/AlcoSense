@@ -6,6 +6,7 @@ import {
 	resolveDrinkMinute,
 	driveTimeMinute,
 	bacNow,
+	peakFromMinute,
 	sampleCurve,
 	buildProjectionTimeline,
 	firstDrinkMinute
@@ -280,5 +281,31 @@ describe('buildProjectionTimeline', () => {
 		expect(tl.fromMin).toBe(nowMin);
 		expect(tl.peakBac).toBe(0);
 		expect(tl.points.every((p) => p.bac === 0)).toBe(true);
+	});
+});
+
+describe('peakFromMinute', () => {
+	it('is 0 without drinks', () => {
+		expect(peakFromMinute([], HOMME, 'vide', 1200)).toBe(0);
+	});
+
+	it('looks ahead through pending absorption right after drinking', () => {
+		// 3 beers consumed at "now" (20:00): current BAC is ~0 but the projected
+		// peak is ~0.49 — just under the 0.5 limit yet above 0.8 × limit (0.4).
+		const now = 1200;
+		expect(bacNow(beers(3, '20:00'), HOMME, 'vide', new Date(2026, 0, 1, 20, 0))).toBeCloseTo(
+			0,
+			2
+		);
+		const peak = peakFromMinute(beers(3, '20:00'), HOMME, 'vide', now);
+		expect(peak).toBeGreaterThan(0.4);
+		expect(peak).toBeLessThan(0.5);
+	});
+
+	it('reflects the declining value once the peak is behind (no future re-rise)', () => {
+		// 3 beers at 19:00, now 20:00: already absorbed and declining. The forward
+		// peak equals the current value, not the earlier (higher) historical peak.
+		const peak = peakFromMinute(beers(3, '19:00'), HOMME, 'vide', 1200);
+		expect(peak).toBeLessThan(0.489); // below the ~0.489 historical peak at 19:30
 	});
 });

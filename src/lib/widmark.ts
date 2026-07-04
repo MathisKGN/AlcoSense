@@ -166,6 +166,32 @@ export function driveTimeMinute(
 	return candidate;
 }
 
+/**
+ * Highest BAC (g/L) the trajectory still reaches from `nowMin` onward (next 24h).
+ * Unlike the current instantaneous BAC, this looks ahead through pending
+ * absorption: right after drinking, `bacNow` is ~0 but the projected peak already
+ * reflects what the person will climb to. Returns 0 when there are no drinks.
+ */
+export function peakFromMinute(
+	drinks: Drink[],
+	profile: Profile,
+	stomach: StomachState,
+	nowMin: number
+): number {
+	const items = toAbsorbed(drinks, nowMin);
+	if (items.length === 0) return 0;
+	const r = WIDMARK_R[profile.sexe];
+	const rise = STOMACH_RISE_MIN[stomach];
+	const horizon = nowMin + DAY;
+	const { firstStart, bac } = trajectory(items, profile.poids, r, rise, horizon);
+	let peak = 0;
+	for (let t = nowMin; t <= horizon; t++) {
+		const idx = t - firstStart;
+		if (idx >= 0) peak = Math.max(peak, bac[idx]);
+	}
+	return peak;
+}
+
 export interface CurvePoint {
 	minutesFromNow: number;
 	bac: number;
