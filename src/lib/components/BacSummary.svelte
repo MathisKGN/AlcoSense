@@ -67,16 +67,16 @@
 >
 	<div class="min-w-[88px] text-center">
 		<p class="text-[10px] font-bold tracking-wider text-outline uppercase">Estimation</p>
-		<p class="text-4xl leading-none font-thin tabular-nums {ui.accent}">{display}</p>
+		<p class="text-4xl leading-none font-thin tabular-nums {ui.accent}" data-testid="bac-value">{display}</p>
 		<p class="text-[10px] font-semibold text-outline uppercase">g/L</p>
 	</div>
 	<div class="min-w-0 flex-1">
 		<div class="mb-1 flex items-center gap-2">
 			<span class="material-symbols-outlined text-lg {ui.accent}">{ui.icon}</span>
-			<span class="text-sm font-bold {ui.accent}">{ui.title}</span>
+			<span class="text-sm font-bold {ui.accent}" data-testid="status-title">{ui.title}</span>
 		</div>
-		<p class="text-[11px] text-outline">Limite {limitText} g/L</p>
-		<p class="mt-1 text-sm font-bold text-on-surface">
+		<p class="text-[11px] text-outline" data-testid="limit-value">Limite {limitText} g/L</p>
+		<p class="mt-1 text-sm font-bold text-on-surface" data-testid="drive-message">
 			{#if canDriveNow}
 				Tu peux conduire
 			{:else if driveMin === null}

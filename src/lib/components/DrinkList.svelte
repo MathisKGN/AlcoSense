@@ -7,8 +7,9 @@
 	<div class="flex items-center justify-between">
 		<h2 class="text-2xl font-bold text-on-surface">Consommations</h2>
 		<div class="flex items-center gap-3">
-			<span class="rounded-full bg-surface-container px-3 py-1 text-xs font-bold text-primary"
-				>{drinks.length}</span
+			<span
+				class="rounded-full bg-surface-container px-3 py-1 text-xs font-bold text-primary"
+				data-testid="drink-count">{drinks.length}</span
 			>
 			<button
 				type="button"
@@ -25,6 +26,7 @@
 		{#if drinks.length === 0}
 			<div
 				class="rounded-2xl border-2 border-dashed border-surface-container bg-white/50 py-10 text-center text-sm text-outline italic opacity-40"
+				data-testid="empty-state"
 			>
 				Aucune boisson ajoutée
 			</div>
