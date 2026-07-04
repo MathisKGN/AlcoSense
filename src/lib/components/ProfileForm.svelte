@@ -16,7 +16,7 @@
 
 	<!-- Genre -->
 	<div>
-		<label class="mb-3 block text-[11px] font-bold text-outline uppercase">Genre</label>
+		<span class="mb-3 block text-[11px] font-bold text-outline uppercase">Genre</span>
 		<div class="flex rounded-full border border-surface-container bg-white p-1">
 			<button type="button" class={genderClass('homme')} onclick={() => (profile.sexe = 'homme')}>
 				Homme
@@ -47,7 +47,7 @@
 
 	<!-- État estomac -->
 	<div>
-		<label class="mb-3 block text-[11px] font-bold text-outline uppercase">État de l'estomac</label>
+		<span class="mb-3 block text-[11px] font-bold text-outline uppercase">État de l'estomac</span>
 		<div class="grid grid-cols-1 gap-2">
 			{#each stomachStates as state (state)}
 				<button
