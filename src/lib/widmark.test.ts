@@ -135,8 +135,9 @@ describe('driveTimeMinute', () => {
 			heure: '10:00'
 		}));
 		const t = driveTimeMinute(drinks, HOMME, 'vide', 600);
-		expect(t - 600).toBeGreaterThan(155);
-		expect(t - 600).toBeLessThan(170);
+		expect(t).not.toBeNull();
+		expect(t! - 600).toBeGreaterThan(155);
+		expect(t! - 600).toBeLessThan(170);
 	});
 
 	it('is later for a young driver (limit 0.2 vs 0.5)', () => {
